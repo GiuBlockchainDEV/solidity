@@ -32,8 +32,8 @@ contract degenNFT is ERC721A, Ownable, ReentrancyGuard {
     string public uriPrefix = "";
     string public uriSuffix = ".json";
 
-    uint256 public costWhitelist = 0.01 ether;
-    uint256 public costPublicSale = 0.02 ether;
+    uint256 public costWhitelist = 0.0001 ether;
+    uint256 public costPublicSale = 0.0002 ether;
     uint256 public NFTminted;
 
     bool public paused = true;
@@ -75,6 +75,23 @@ contract degenNFT is ERC721A, Ownable, ReentrancyGuard {
         link[_token_id][i].id_company = _id_company;
         link[_token_id][i].timestamp = block.timestamp;}
 
+    function remove_link(address _wallet_address, string memory _id_company, uint256 _token_id) public onlyOwner { 
+        require(check_token_owned(_wallet_address, _token_id) == 1, "Token not owned"); 
+        uint256 linked = linked_company[_token_id];
+        for (uint i = 0; i <= linked; i++) {
+            if(keccak256(bytes(link[_token_id][i].id_company)) == keccak256(bytes(_id_company))){
+                link[_token_id][i].id_company = "removed";
+                link[_token_id][i].timestamp = block.timestamp;}}}
+
+    function check_link_id(address _wallet_address, string memory _id_company, uint256 _token_id) public view returns (uint8 _linked_company, uint256 valueReturn) { 
+        require(check_token_owned(_wallet_address, _token_id) == 1, "Token not owned"); 
+        uint256 linked = linked_company[_token_id];
+        for (uint i = 0; i <= linked; i++) {
+            if(keccak256(bytes(link[_token_id][i].id_company)) == keccak256(bytes(_id_company))){
+                _linked_company = 1;
+                valueReturn = i;}}         
+        return (_linked_company, valueReturn);}
+
     function check_all_token_owned(address _wallet_address) public view returns (uint256[] memory valueReturn){
         require(totalSupply() > 0, "0 NFT Minted");
         uint256 mintedNFT = totalSupply();
@@ -84,6 +101,14 @@ contract degenNFT is ERC721A, Ownable, ReentrancyGuard {
             if(ownerOf(i) == _wallet_address){
                 value[counter] = i;
                 counter ++;}}         
+        return value;}
+
+    function check_all_company_linked(uint256 _token_id) public view returns (string[] memory valueReturn){
+        require(linked_company[_token_id] > 0, "0 Linked Company");
+        uint256 linkedcomp = linked_company[_token_id];
+        string[] memory value = new string[](linkedcomp);
+        for (uint i = 0; i < linkedcomp; i++) {
+                value[i] = link[_token_id][i].id_company;}         
         return value;}
 
     function check_token_owned(address _wallet_address, uint256 token_id) public view returns (uint8 valueReturn){
