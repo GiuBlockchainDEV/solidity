@@ -193,4 +193,4 @@ contract degenNFT is ERC721A, Ownable, ReentrancyGuard {
         require(os);}
         
     function _baseURI() internal view virtual override returns (string memory) {
-        return uriPrefix;}}
+        return uriPrefix;}} 
